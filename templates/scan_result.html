@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Scan Result - Library Management System</title>
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow-lg rounded" style="width: 80%; max-width: 800px;">
+            <div class="card-body">
+                <h1 class="card-title text-center mb-4">Scan Result</h1>
+
+                <div class="alert alert-info text-center">
+                    <p>{{ message }}</p>
+                </div>
+
+                {% if recommendations %}
+                    <h2 class="mt-4">Recommended Books from the Same Genre:</h2>
+                    <ul class="list-group">
+                        {% for book in recommendations %}
+                        <li class="list-group-item d-flex align-items-center">
+                            
+                            <div>
+                                <strong>{{ book.title }}</strong> (Rack {{ book.rack_no }})
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <div class="text-center mt-4">
+                    <a href="/scan" class="btn btn-lg btn-primary">Scan Another Book</a>
+                    <a href="/" class="btn btn-lg btn-secondary ml-3">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

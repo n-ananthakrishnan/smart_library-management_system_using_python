@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Add Book - Library Management System</title>
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow-lg rounded">
+            <div class="card-body">
+                <h1 class="card-title text-center mb-5">Add a New Book</h1>
+                <form action="/add_book" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="bookTitle">Book Title</label>
+                        <input type="text" id="bookTitle" name="title" class="form-control" placeholder="Enter book title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="barcode">Barcode</label>
+                        <input type="text" id="barcode" name="barcode" class="form-control" placeholder="Enter barcode" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="genre">Genre</label>
+                        <select id="genre" name="genre" class="form-control" required>
+                            <option value="" disabled selected>Select genre</option>
+                            <option value="Fiction">Fiction</option>
+                            <option value="Non-fiction">Non-fiction</option>
+                            <option value="Science">Science</option>
+                            <option value="Biography">Biography</option>
+                            <option value="History">History</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="rack_no">Rack Number</label>
+                        <input type="text" id="rack_no" name="rack_no" class="form-control" placeholder="Enter rack number" required>
+                    </div>
+                    
+                    
+                    <button type="submit" class="btn btn-block mt-4">Add Book</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

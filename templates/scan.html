@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Scan Barcode - Library Management System</title>
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow-lg rounded" style="width: 80%; max-width: 600px;">
+            <div class="card-body">
+                <h1 class="card-title text-center mb-4">Scan Barcode</h1>
+                <form method="POST" action="/scan">
+                    <div class="form-group">
+                        <label for="rack_no">Enter Rack Number</label>
+                        <input type="text" id="rack_no" name="rack_no" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-block btn-primary">Start Scanning</button>
+                </form>
+                {% if error %}
+                <div class="alert alert-danger mt-4 text-center">
+                    {{ error }}
+                </div>
+                {% endif %}
+                <div class="text-center mt-4">
+                    <a href="/" class="btn btn-secondary btn-lg">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

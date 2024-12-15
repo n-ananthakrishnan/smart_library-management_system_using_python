@@ -1,0 +1,94 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap');
+/* General Reset */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif; /* Modern font */
+    background-color: #3b3b3b; /* Soft beige background */
+    color: #3b3b3b; /* Dark charcoal for text */
+    height: 100%;
+}
+
+/* Card Styling */
+.card {
+    background-color: #FFFFFF; /* White background for card */
+    border-radius: 15px; /* Rounded corners for smooth edges */
+    max-width: 600px;
+    width: 100%;
+    padding: 30px;
+    transition: all 0.4s ease-in-out;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    border: 2px solid #ffec20;
+}
+
+/* Hover effect for card */
+.card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Card Title */
+.card-title {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #ff3535; /* Indigo for title */
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    font-family: "Inter", sans-serif;
+}
+
+/* Button Styling */
+nav a {
+    display: block;
+    text-decoration: none;
+    font-size: 1.25rem;
+    padding: 15px 30px;
+    border-radius: 50px; /* Rounded button */
+    background-color: #4B0082; /* Rich indigo for button */
+    color: #FFFFFF; /* White text */
+    font-weight: 500;
+    text-transform: uppercase;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1); /* Light shadow for buttons */
+    font-family: "Fredoka", sans-serif;
+    font-weight: 700;
+    transition:
+    width 2s,
+    height 2s,
+    background-color 2s,
+    rotate 2s;/* Smooth transition for buttons */
+    width: 70%;
+    margin: 0 auto;
+}
+
+/* Hover effect for buttons */
+nav a:hover {
+    background-color: #fffd6d; /* Vibrant gold on hover */
+    color: #000000; /* Change text color for contrast */
+    transform: translateY(-5px); /* Lifting effect */
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2); /* Stronger shadow */
+}
+
+/* Focus effect for buttons */
+nav a:focus {
+    outline: none;
+    transform: scale(1.1); /* Slight zoom-in effect */
+}
+
+/* Active effect for buttons */
+nav a:active {
+    transform: translateY(2px); /* Button presses down when clicked */
+    box-shadow: none; /* Remove shadow on click */
+}
+
+/* Responsive Layout for Smaller Screens */
+@media (max-width: 768px) {
+    .card-title {
+        font-size: 1.8rem;
+    }
+
+    nav a {
+        font-size: 1.1rem;
+        padding: 12px 25px;
+    }
+}
