@@ -1,0 +1,36 @@
+# Django Framework & Core
+Django==4.2.12
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+django-filter==23.5
+django-crispy-forms>=2.3
+crispy-bootstrap5==2024.10
+django-extensions==3.2.3
+
+# WebSocket & Real-time
+channels==3.0.5
+daphne==3.0.2
+channels-redis==4.1.0
+
+# Image Processing
+Pillow==11.0.0
+
+# QR Code & Barcode
+qrcode==7.4.2
+pyzbar==0.1.9
+
+# Utilities
+python-dotenv==1.0.0
+dj-database-url==2.1.0
+requests==2.31.0
+
+# Production Server
+gunicorn==21.2.0
+whitenoise==6.6.0
+gevent==25.8.1
+gevent-websocket==0.10.1
+
+# Database
+# psycopg2-binary is included in Docker images only for PostgreSQL support
+# For local PostgreSQL development, install separately: pip install psycopg2-binary==2.9.9
+# Local development uses SQLite by default (DATABASE_URL not required)

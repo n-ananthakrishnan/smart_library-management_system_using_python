@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}Librarian Dashboard - SmartLib{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="welcome-card">
+                <h1 class="mb-2">
+                    <i class="fas fa-user-cog"></i> Librarian Dashboard
+                </h1>
+                <p class="text-muted mb-0">
+                    {{ request.user.full_name }} | Last login: Just now
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-box">
+                <div class="stat-content">
+                    <div class="stat-number">{{ total_books }}</div>
+                    <div class="stat-label">Total Books</div>
+                </div>
+                <div class="stat-icon"><i class="fas fa-book"></i></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-box">
+                <div class="stat-content">
+                    <div class="stat-number">{{ available_books }}</div>
+                    <div class="stat-label">Available</div>
+                </div>
+                <div class="stat-icon"><i class="fas fa-check-circle text-success"></i></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-box">
+                <div class="stat-content">
+                    <div class="stat-number">{{ active_borrowings }}</div>
+                    <div class="stat-label">Currently Borrowed</div>
+                </div>
+                <div class="stat-icon"><i class="fas fa-exchange-alt text-info"></i></div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-box {% if overdue_count > 0 %}stat-warning{% endif %}">
+                <div class="stat-content">
+                    <div class="stat-number">{{ overdue_count }}</div>
+                    <div class="stat-label">Overdue</div>
+                </div>
+                <div class="stat-icon"><i class="fas fa-exclamation-circle text-danger"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="stat-box">
+                <div class="stat-content">
+                    <div class="stat-number">{{ total_members }}</div>
+                    <div class="stat-label">Active Members</div>
+                </div>
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="stat-box">
+                <div class="stat-content">
+                    <div class="stat-number">{{ (total_books - available_books) }}</div>
+                    <div class="stat-label">Books in Circulation</div>
+                </div>
+                <div class="stat-icon"><i class="fas fa-percent text-success"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Quick Actions -->
+        <div class="col-lg-4">
+            <div class="card dashboard-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'add_book' %}" class="btn btn-primary btn-sm w-100 mb-2">
+                        <i class="fas fa-plus"></i> Add New Book
+                    </a>
+                    <a href="{% url 'view_books' %}" class="btn btn-info btn-sm w-100 mb-2">
+                        <i class="fas fa-book"></i> Manage Books
+                    </a>
+                    <a href="{% url 'scan_book' %}" class="btn btn-warning btn-sm w-100">
+                        <i class="fas fa-barcode"></i> Scan Books
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="col-lg-8">
+            <div class="card dashboard-card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-history"></i> Recent Activities</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_activities %}
+                        <div class="activity-timeline">
+                            {% for activity in recent_activities %}
+                            <div class="activity-item">
+                                <div class="activity-time">
+                                    {{ activity.timestamp|date:"H:i" }}
+                                </div>
+                                <div class="activity-content">
+                                    <span class="activity-action">
+                                        {% if activity.action == 'add_book' %}
+                                            <i class="fas fa-plus-circle text-success"></i> Book Added
+                                        {% elif activity.action == 'edit_book' %}
+                                            <i class="fas fa-edit text-info"></i> Book Updated
+                                        {% elif activity.action == 'delete_book' %}
+                                            <i class="fas fa-trash text-danger"></i> Book Deleted
+                                        {% elif activity.action == 'borrow' %}
+                                            <i class="fas fa-book-open text-primary"></i> Book Borrowed
+                                        {% elif activity.action == 'return' %}
+                                            <i class="fas fa-undo text-success"></i> Book Returned
+                                        {% else %}
+                                            <i class="fas fa-dot-circle"></i> {{ activity.action|replace('_', ' ')|title }}
+                                        {% endif %}
+                                    </span>
+                                    {% if activity.book %}
+                                        <span class="activity-book">{{ activity.book.title }}</span>
+                                    {% endif %}
+                                    {% if activity.user %}
+                                        <span class="activity-user">by {{ activity.user.full_name }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">No recent activities</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.welcome-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+}
+
+.welcome-card h1 {
+    font-weight: 700;
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.stat-box {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.stat-box.stat-warning {
+    border-left: 4px solid #ffc107;
+}
+
+.stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-icon {
+    font-size: 40px;
+    color: rgba(102, 126, 234, 0.15);
+}
+
+.dashboard-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.card-header {
+    background: white;
+    border-radius: 15px 15px 0 0;
+    border-bottom: 2px solid #f0f0f0;
+    padding: 15px 20px;
+    font-weight: 600;
+}
+
+.activity-timeline {
+    position: relative;
+    padding: 10px 0;
+}
+
+.activity-item {
+    display: flex;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-time {
+    font-weight: 600;
+    color: #667eea;
+    min-width: 60px;
+    font-size: 12px;
+}
+
+.activity-content {
+    flex-grow: 1;
+}
+
+.activity-action {
+    display: inline-block;
+    margin-right: 10px;
+    font-weight: 600;
+}
+
+.activity-book {
+    display: block;
+    font-size: 13px;
+    color: #333;
+    margin-top: 3px;
+    font-weight: 500;
+}
+
+.activity-user {
+    display: block;
+    font-size: 12px;
+    color: #999;
+}
+</style>
+
+{% endblock %}

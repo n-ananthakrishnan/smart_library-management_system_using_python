@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Scan Result - SmartLib{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Result Card -->
+            <div class="card mb-4">
+                <div class="card-body text-center py-5">
+                    {% if success %}
+                        <div class="alert alert-success mb-4">
+                            <i class="fas fa-check-circle" style="font-size: 48px;"></i>
+                        </div>
+                        <h3 class="text-success mb-3">{{ message }}</h3>
+                    {% else %}
+                        <div class="alert alert-danger mb-4">
+                            <i class="fas fa-times-circle" style="font-size: 48px;"></i>
+                        </div>
+                        <h3 class="text-danger mb-3">{{ message }}</h3>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Book Details (if found) -->
+            {% if book %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-book"></i> Book Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Title:</strong> {{ book.title }}</p>
+                            <p><strong>Author:</strong> {{ book.author }}</p>
+                            <p><strong>ISBN:</strong> {{ book.isbn }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Genre:</strong> {{ book.genre }}</p>
+                            <p><strong>Rack No:</strong> {{ book.rack_no }}</p>
+                            <p><strong>Shelf No:</strong> {{ book.shelf_no or 'N/A' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Recommendations -->
+            {% if recommendations %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb"></i> You Might Like</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        {% for rec_book in recommendations %}
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded">
+                                <h6>{{ rec_book.title }}</h6>
+                                <p class="small text-muted mb-2">by {{ rec_book.author }}</p>
+                                <p class="small mb-0">
+                                    <span class="badge bg-info">{{ rec_book.genre }}</span>
+                                </p>
+                                <a href="{% url 'view_book_detail' rec_book.id %}" class="btn btn-sm btn-primary mt-2">
+                                    View Book
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="mt-4 d-flex gap-2 justify-content-center">
+                <a href="{% url 'scan_book' %}" class="btn btn-primary">
+                    <i class="fas fa-redo"></i> Scan Another
+                </a>
+                <a href="{% url 'view_books' %}" class="btn btn-info">
+                    <i class="fas fa-book"></i> Browse Books
+                </a>
+                <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

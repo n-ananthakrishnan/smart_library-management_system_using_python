@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Book - SmartLib{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0"><i class="fas fa-edit"></i> Edit Book Details</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'edit_book' book.id %}">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Title</label>
+                                <input type="text" name="title" class="form-control" value="{{ book.title }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Author</label>
+                                <input type="text" name="author" class="form-control" value="{{ book.author }}" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">ISBN</label>
+                                <input type="text" name="isbn" class="form-control" value="{{ book.isbn }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Barcode</label>
+                                <input type="text" name="barcode" class="form-control" value="{{ book.barcode }}" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Genre</label>
+                                <input type="text" name="genre" class="form-control" value="{{ book.genre }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Category</label>
+                                <input type="text" name="category" class="form-control" value="{{ book.category or '' }}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Rack No.</label>
+                                <input type="text" name="rack_no" class="form-control" value="{{ book.rack_no }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Shelf No.</label>
+                                <input type="text" name="shelf_no" class="form-control" value="{{ book.shelf_no or '' }}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Edition</label>
+                                <input type="text" name="edition" class="form-control" value="{{ book.edition or '' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Publication Year</label>
+                                <input type="number" name="publication_year" class="form-control" value="{{ book.publication_year or '' }}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Publisher</label>
+                                <input type="text" name="publisher" class="form-control" value="{{ book.publisher or '' }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Pages</label>
+                                <input type="number" name="pages" class="form-control" value="{{ book.pages or '' }}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="4">{{ book.description or '' }}</textarea>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'view_book_detail' book.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

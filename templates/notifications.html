@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - SmartLib{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="mb-2"><i class="fas fa-bell"></i> Notifications</h1>
+            <p class="text-muted">Stay updated with library alerts and reminders</p>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-8">
+            {% if notifications.items %}
+                {% for notification in notifications.items %}
+                <div class="card mb-3 {% if not notification.is_read %}border-left-primary{% endif %}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center mb-2">
+                                    {% if notification.type == 'overdue' %}
+                                        <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                                    {% elif notification.type == 'available' %}
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                    {% elif notification.type == 'reminder' %}
+                                        <i class="fas fa-clock text-warning me-2"></i>
+                                    {% elif notification.type == 'borrow' %}
+                                        <i class="fas fa-book text-info me-2"></i>
+                                    {% elif notification.type == 'reservation' %}
+                                        <i class="fas fa-bookmark text-primary me-2"></i>
+                                    {% else %}
+                                        <i class="fas fa-info-circle text-info me-2"></i>
+                                    {% endif %}
+                                    <h5 class="mb-0">{{ notification.title }}</h5>
+                                </div>
+                                <p class="mb-2">{{ notification.message }}</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-clock"></i> {{ notification.created_at|date:"d-m-Y H:i" }}
+                                </small>
+                            </div>
+                            {% if not notification.is_read %}
+                            <form method="POST" action="{% url 'mark_notification_read' notification.id %}" class="d-inline" style="margin-left: 10px;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-success" title="Mark as read">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Pagination -->
+                {% if notifications.pages > 1 %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        {% if notifications.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{% url 'get_notifications' page=notifications.prev_num %}">Previous</a>
+                            </li>
+                        {% endif %}
+
+                        {% for page_num in notifications.iter_pages %}
+                            {% if page_num %}
+                                {% if page_num == notifications.page %}
+                                    <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="{% url 'get_notifications' page=page_num %}">{{ page_num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if notifications.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{% url 'get_notifications' page=notifications.next_num %}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info text-center py-5">
+                    <i class="fas fa-bell-slash" style="font-size: 48px;"></i>
+                    <h5 class="mt-3">No Notifications</h5>
+                    <p>You're all caught up! No new notifications at the moment.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Notification Settings</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">You'll receive notifications for:</p>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" checked disabled>
+                        <label class="form-check-label">Overdue books</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" checked disabled>
+                        <label class="form-check-label">Book availability</label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" checked disabled>
+                        <label class="form-check-label">Due date reminders</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" checked disabled>
+                        <label class="form-check-label">Reservation updates</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}{{ book.title }} - SmartLib{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-4">
+        <!-- Book Cover and Info -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="book-cover-large">
+                    {% load static %}
+                    {% if book.cover_image %}
+                        <img src="{% static 'uploads/' %}{{ book.cover_image }}" alt="{{ book.title }}">
+                    {% else %}
+                        <div class="placeholder"><i class="fas fa-book"></i></div>
+                    {% endif %}
+                </div>
+
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        {% if book.is_available() %}
+                            <span class="badge bg-success">Available</span>
+                        {% else %}
+                            <span class="badge bg-danger">Not Available</span>
+                        {% endif %}
+                        <button class="btn btn-sm btn-light" onclick="SmartLib.generateQRCode({{ book.id }})">
+                            <i class="fas fa-qrcode"></i> QR Code
+                        </button>
+                    </div>
+
+                    <p class="text-muted small">
+                        <i class="fas fa-copy"></i> Copies Available: {{ book.available_copies }}/{{ book.total_copies }}
+                    </p>
+
+                    {% if request.user.is_authenticated %}
+                        {% if book.is_available %}
+                            <form method="POST" action="{% url 'borrow_book' book.id %}" class="mb-2">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-book"></i> Borrow This Book
+                                </button>
+                            </form>
+                        {% else %}
+                            <form method="POST" action="{% url 'reserve_book' book.id %}" class="mb-2">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-warning w-100">
+                                    <i class="fas fa-bell"></i> Reserve Book
+                                </button>
+                            </form>
+                        {% endif %}
+                        
+                        {% if request.user.role != 'student' %}
+                            <a href="{% url 'edit_book' book.id %}" class="btn btn-info btn-sm w-100 mb-2">
+                                <i class="fas fa-edit"></i> Edit Book
+                            </a>
+                            <form method="POST" action="{% url 'delete_book' book.id %}" class="mb-2">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm w-100" onclick="return confirm('Delete this book?')">
+                                    <i class="fas fa-trash"></i> Delete Book
+                                </button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-primary w-100">
+                            <i class="fas fa-sign-in-alt"></i> Login to Borrow
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Book Details -->
+        <div class="col-lg-8">
+            <h1 class="mb-2">{{ book.title }}</h1>
+            <p class="text-muted fs-5 mb-4">by {{ book.author }}</p>
+
+            {% if book.average_rating > 0 %}
+            <div class="mb-4">
+                {% for i in range(5) %}
+                    {% if i < book.average_rating %}
+                        <i class="fas fa-star text-warning"></i>
+                    {% else %}
+                        <i class="far fa-star text-muted"></i>
+                    {% endif %}
+                {% endfor %}
+                <span class="ms-2">{{ book.average_rating|round(1) }}/5 ({{ book.reviews|length }} reviews)</span>
+            </div>
+            {% endif %}
+
+            <!-- Book Metadata -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="metadata-item">
+                        <strong>ISBN:</strong>
+                        <span>{{ book.isbn }}</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="metadata-item">
+                        <strong>Genre:</strong>
+                        <span>{{ book.genre }}</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="metadata-item">
+                        <strong>Publisher:</strong>
+                        <span>{{ book.publisher or 'N/A' }}</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="metadata-item">
+                        <strong>Publication Year:</strong>
+                        <span>{{ book.publication_year or 'N/A' }}</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="metadata-item">
+                        <strong>Pages:</strong>
+                        <span>{{ book.pages or 'N/A' }}</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="metadata-item">
+                        <strong>Edition:</strong>
+                        <span>{{ book.edition or 'N/A' }}</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="metadata-item">
+                        <strong>Location:</strong>
+                        <span><i class="fas fa-location-dot"></i> Rack {{ book.rack_no }}, Shelf {{ book.shelf_no or '-' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            {% if book.description %}
+            <div class="mb-4">
+                <h5>Description</h5>
+                <p>{{ book.description }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Reviews Section -->
+            <div class="mt-5">
+                <h5 class="mb-4"><i class="fas fa-comments"></i> Reviews & Ratings</h5>
+
+                {% if request.user.is_authenticated %}
+                    <div class="review-form mb-4 p-3 bg-light rounded">
+                        <h6>Share Your Review</h6>
+                        <form method="POST" action="{% url 'add_review' book.id %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label">Rating</label>
+                                <div class="rating-input">
+                                    {% for i in range(1, 6) %}
+                                        <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}" {% if user_review and user_review.rating == i %}checked{% endif %} required>
+                                        <label for="star{{ i }}"><i class="fas fa-star"></i></label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Your Review</label>
+                                <textarea name="review_text" class="form-control" rows="3" placeholder="Share your thoughts...">{% if user_review %}{{ user_review.review_text }}{% endif %}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="fas fa-paper-plane"></i> Submit Review
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+
+                {% if book.reviews %}
+                    <div class="reviews-list">
+                        {% for review in reviews %}
+                        <div class="review-item mb-3 p-3 border-bottom">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>{{ review.user.full_name }}</strong>
+                                    <div class="rating small">
+                                        {% for i in range(5) %}
+                                            {% if i < review.rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-muted"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <small class="text-muted">{{ review.created_at|date:"d-m-Y" }}</small>
+                            </div>
+                            {% if review.review_text %}
+                                <p class="mt-2 mb-0">{{ review.review_text }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted text-center">No reviews yet. Be the first to review this book!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR Code Modal -->
+<div class="modal fade" id="qrModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Book QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="qrImage" src="" alt="QR Code" style="max-width: 100%; height: auto;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.book-cover-large {
+    width: 100%;
+    aspect-ratio: 3/4;
+    background: #f0f0f0;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.book-cover-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.placeholder {
+    font-size: 80px;
+    color: #ddd;
+}
+
+.metadata-item {
+    margin-bottom: 10px;
+}
+
+.metadata-item strong {
+    color: #667eea;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.rating-input {
+    display: flex;
+    gap: 10px;
+    font-size: 24px;
+}
+
+.rating-input input {
+    display: none;
+}
+
+.rating-input input:checked ~ label,
+.rating-input label:hover,
+.rating-input label:hover ~ label {
+    color: #ffc107;
+}
+
+.rating-input label {
+    cursor: pointer;
+    color: #ddd;
+    transition: all 0.2s;
+}
+
+.review-item {
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.review-item .rating {
+    margin-top: 5px;
+}
+</style>
+
+{% endblock %}

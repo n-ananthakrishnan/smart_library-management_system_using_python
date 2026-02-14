@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - SmartLib{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Welcome Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="welcome-card">
+                <h1 class="mb-2">
+                    <i class="fas fa-wave-hand"></i> Welcome, {{ request.user.full_name }}!
+                </h1>
+                <p class="text-muted mb-0">
+                    {{ request.user.roll_number|default:'Student Member' }} | 
+                    Member since {{ request.user.created_at|date:"F Y" }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-box">
+                <div class="stat-content">
+                    <div class="stat-number">{{ active_borrowings|length }}</div>
+                    <div class="stat-label">Books Borrowed</div>
+                </div>
+                <div class="stat-icon"><i class="fas fa-book"></i></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-box {% if overdue_count > 0 %}stat-warning{% endif %}">
+                <div class="stat-content">
+                    <div class="stat-number">{{ overdue_count }}</div>
+                    <div class="stat-label">Overdue Books</div>
+                </div>
+                <div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-box {% if total_fine > 0 %}stat-danger{% endif %}">
+                <div class="stat-content">
+                    <div class="stat-number">₹{{ total_fine|int }}</div>
+                    <div class="stat-label">Fine Due</div>
+                </div>
+                <div class="stat-icon"><i class="fas fa-money-bill"></i></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Active Borrowings -->
+        <div class="col-lg-8">
+            <div class="card dashboard-card">
+                <div class="card-header border-bottom">
+                    <h5 class="mb-0"><i class="fas fa-book-open"></i> My Borrowed Books</h5>
+                </div>
+                <div class="card-body">
+                    {% if active_borrowings %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Book</th>
+                                        <th>Borrowed</th>
+                                        <th>Due Date</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for borrowing in active_borrowings %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ borrowing.book.title }}</strong><br>
+                                            <small class="text-muted">{{ borrowing.book.author }}</small>
+                                        </td>
+                                        <td>{{ borrowing.borrowed_at|date:"d-m-Y" }}</td>
+                                        <td>
+                                            <strong>{{ borrowing.due_date|date:"d-m-Y" }}</strong>
+                                        </td>
+                                        <td>
+                                            {% if borrowing.is_overdue() %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-exclamation"></i>
+                                                    {{ borrowing.get_days_overdue() }} days overdue
+                                                </span>
+                                            {% else %}
+                                                {% set days_left = (borrowing.due_date - borrowing.borrowed_at).days - (now() - borrowing.borrowed_at).days %}
+                                                <span class="badge bg-success">
+                                                    {% if days_left <= 3 %}
+                                                        <i class="fas fa-clock"></i> Expires soon
+                                                    {% else %}
+                                                        <i class="fas fa-check"></i> On Time
+                                                    {% endif %}
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <form method="POST" action="{% url 'return_book' borrowing.id %}" style="display:inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-undo"></i> Return
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox" style="font-size: 48px; color: #ccc;"></i>
+                            <p class="text-muted mt-3">No books borrowed yet</p>
+                            <a href="{% url 'view_books' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-search"></i> Browse Books
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Sidebar -->
+        <div class="col-lg-4">
+            <div class="card dashboard-card">
+                <div class="card-header border-bottom">
+                    <h5 class="mb-0"><i class="fas fa-bell"></i> Notifications</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if notifications %}
+                        <div class="notification-list">
+                            {% for notification in notifications[:5] %}
+                            <div class="notification-item">
+                                <div class="notification-badge">
+                                    {% if notification.type == 'overdue' %}
+                                        <i class="fas fa-exclamation-circle text-danger"></i>
+                                    {% elif notification.type == 'available' %}
+                                        <i class="fas fa-check-circle text-success"></i>
+                                    {% elif notification.type == 'reminder' %}
+                                        <i class="fas fa-clock text-warning"></i>
+                                    {% else %}
+                                        <i class="fas fa-info-circle text-info"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="notification-content">
+                                    <h6 class="mb-1">{{ notification.title }}</h6>
+                                    <p class="mb-1">{{ notification.message }}</p>
+                                    <small class="text-muted">
+                                        {{ notification.created_at|date:"d-m-Y H:i" }}
+                                    </small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if notifications|length > 5 %}
+                        <div class="text-center p-3 border-top">
+                            <a href="{% url 'get_notifications' %}" class="btn btn-link btn-sm">
+                                View All Notifications
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5 px-3">
+                            <i class="fas fa-bell-slash" style="font-size: 40px; color: #ccc;"></i>
+                            <p class="text-muted mt-3 small">No new notifications</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card dashboard-card mt-3">
+                <div class="card-header border-bottom">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'view_books' %}" class="btn btn-primary btn-sm w-100 mb-2">
+                        <i class="fas fa-search"></i> Browse Books
+                    </a>
+                    <a href="{% url 'scan_book' %}" class="btn btn-info btn-sm w-100 mb-2">
+                        <i class="fas fa-barcode"></i> Scan Barcode
+                    </a>
+                    <a href="{% url 'get_notifications' %}" class="btn btn-warning btn-sm w-100">
+                        <i class="fas fa-bell"></i> All Notifications
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.welcome-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.2);
+}
+
+.welcome-card h1 {
+    font-weight: 700;
+    font-size: 32px;
+}
+
+.stat-box {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.stat-box.stat-warning {
+    border-left: 4px solid #ffc107;
+}
+
+.stat-box.stat-danger {
+    border-left: 4px solid #dc3545;
+}
+
+.stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    color: #667eea;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-icon {
+    font-size: 40px;
+    color: rgba(102, 126, 234, 0.15);
+}
+
+.dashboard-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.card-header {
+    background: white;
+    border-radius: 15px 15px 0 0;
+    padding: 15px 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+.notification-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    display: flex;
+    gap: 12px;
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.3s ease;
+}
+
+.notification-item:hover {
+    background: #f8f9fa;
+}
+
+.notification-badge {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.notification-content h6 {
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+}
+
+.notification-content p {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 5px;
+}
+</style>
+
+{% endblock %}
